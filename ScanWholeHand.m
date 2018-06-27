@@ -26,13 +26,14 @@ end
 sNI.Rate = Fs;
 
 %--------------------------------------------------------------------------
+% Prepare stimuli: Chirp
 Ts = 1/Fs;
 t = 0:Ts:6;
 chirp_f0 = 50;
 chirp_f1 = 2000;
 Chirp_sig = chirp(t,chirp_f0,t(end),chirp_f1,'logarithmic'); 
 Chirp_sig = diff(Chirp_sig,2); % Second order derivative
-Chirp_sig = 4.*Chirp_sig'./max(abs(Chirp_sig));
+Chirp_sig = P2PAmp.*Chirp_sig'./max(abs(Chirp_sig));
 ind = find(Chirp_sig>=0,1);
 Chirp_sig(1:ind) = 0;
 
@@ -49,13 +50,37 @@ f_saw = [100, 200, 250, 300];
 f_imp = [10, 50, 100];
 [~, Imp_sig] = sawtoothImpulse(f_imp,Fs,P2PAmp,2*trial_T,2*win_len);
 
-outQueue = [Chirp_sig;DSW_sig;ST_sig;Imp_sig];
+% Prepare stimuli: Bandpassed random noise
+f_bprn = [50, 100, 200, 300, 500, 1000];
+RN_sig = randn(trial_T*Fs,1);
+
+BPRN_Sig = [];
+for i = 1:length(f_bprn)
+    temp = bandpass(RN_sig,[f_bprn(i)-20,f_bprn(i)+20],Fs);
+    temp((win_len+1):end) = 0;
+    BPRN_Sig = [BPRN_Sig;temp];
+end
+BPRN_Sig = P2PAmp.*BPRN_Sig./max(abs(BPRN_Sig));
+
+% Grouping all signals
+outQueue = [Chirp_sig;DSW_sig;ST_sig;Imp_sig;BPRN_Sig];
 
 out_len = size(outQueue,1);
 fprintf('Total output time = %.2f secs\n',out_len/Fs);
 
+%% Test
+% test_sig = RN_sig;
+% sig_len = length(test_sig);
+% bin_num = sig_len/2+1;
+% f = Fs/2*linspace(0,1,bin_num); % Frequency scale
+% Y_fft = fft(test_sig,sig_len)/sig_len; % FFT     
+% abs_Y_fft = 2*abs(Y_fft(1:bin_num)); % Spectrum     
+% plot(f,abs_Y_fft)
+% % xlim([0 1001])
+% xlabel('Frequency (Hz)')
+% ylabel('Amplitude (Volt)')
 %--------------------------------------------------------------------------
-% Run measurement
+%% Run measurement
 if ~isempty(find(abs(outQueue)>4, 1))
     error('Output must be within 4 V!');
 else    

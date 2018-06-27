@@ -33,6 +33,8 @@ chirp_f1 = 2000;
 Chirp_sig = chirp(t,chirp_f0,t(end),chirp_f1,'logarithmic'); 
 Chirp_sig = diff(Chirp_sig,2); % Second order derivative
 Chirp_sig = 4.*Chirp_sig'./max(abs(Chirp_sig));
+ind = find(Chirp_sig>=0,1);
+Chirp_sig(1:ind) = 0;
 
 % Prepare stimuli: Sinewaves (1/3 Octave)
 fn = [40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,2000];

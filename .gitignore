@@ -4,3 +4,6 @@ temp/
 *.png
 *.mat
 *.docx
+*.exe
+*.pdf
+*.avi

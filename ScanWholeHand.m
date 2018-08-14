@@ -17,30 +17,26 @@ if ~exist('sNI','var')
 
     % Analog output channel (actuators)
     ao0 = sNI.addAnalogOutputChannel('Dev3','ao0','Voltage');
-    
-% %     % Analog input channel (LDV)
-% %     ch0 = sNI.addAnalogInputChannel('Dev3','ai0','Voltage');
-% %     ch0.TerminalConfig = 'SingleEndedNonReferenced';
-% %     ch0.Range = [-5,5]; % Input voltage range from -5 to 5V
+%     ao1 = sNI.addAnalogOutputChannel('Dev3','ao1','Voltage');
 end
 sNI.Rate = Fs;
 
 %--------------------------------------------------------------------------
-% Prepare stimuli: Chirp
-Ts = 1/Fs;
-t = 0:Ts:6;
-chirp_f0 = 50;
-chirp_f1 = 2000;
-Chirp_sig = chirp(t,chirp_f0,t(end),chirp_f1,'logarithmic'); 
-Chirp_sig = diff(Chirp_sig,2); % Second order derivative
-Chirp_sig = P2PAmp.*Chirp_sig'./max(abs(Chirp_sig));
-ind = find(Chirp_sig>=0,1);
-Chirp_sig(1:ind) = 0;
+% % Prepare stimuli: Chirp
+% Ts = 1/Fs;
+% t = 0:Ts:6;
+% chirp_f0 = 50;
+% chirp_f1 = 2000;
+% Chirp_sig = chirp(t,chirp_f0,t(end),chirp_f1,'logarithmic'); 
+% Chirp_sig = diff(Chirp_sig,2); % Second order derivative
+% Chirp_sig = P2PAmp.*Chirp_sig'./max(abs(Chirp_sig));
+% ind = find(Chirp_sig>=0,1);
+% Chirp_sig(1:ind) = 0;
 
-% Prepare stimuli: Sinewaves (1/3 Octave)
-fn = [40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,2000];
-f_num = length(fn);
-DSW_sig = discreteSineSweep(fn,Fs,P2PAmp,trial_T,win_len);
+% % Prepare stimuli: Sinewaves (1/3 Octave)
+% fn = [40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,2000];
+% f_num = length(fn);
+% DSW_sig = discreteSineSweep(fn,Fs,P2PAmp,trial_T,win_len);
 
 % Prepare stimuli: Sawtooth
 f_saw = [100, 200, 250, 300];
@@ -63,7 +59,13 @@ end
 BPRN_Sig = P2PAmp.*BPRN_Sig./max(abs(BPRN_Sig));
 
 % Grouping all signals
-outQueue = [Chirp_sig;DSW_sig;ST_sig;Imp_sig;BPRN_Sig];
+outQueue = [ST_sig;Imp_sig;BPRN_Sig];
+
+% Trigger signal
+Trig_sig = zeros(trial_T*Fs,1);
+Trig_sig(win_len-(0.05*Fs):win_len) = 1;
+
+outQueue = [zeros(size(Trig_sig)),Trig_sig;outQueue,zeros(size(outQueue))];
 
 out_len = size(outQueue,1);
 fprintf('Total output time = %.2f secs\n',out_len/Fs);
@@ -81,13 +83,13 @@ fprintf('Total output time = %.2f secs\n',out_len/Fs);
 % ylabel('Amplitude (Volt)')
 %--------------------------------------------------------------------------
 %% Run measurement
-if ~isempty(find(abs(outQueue)>4, 1))
-    error('Output must be within 4 V!');
-else    
-    queueOutputData(sNI,outQueue);
-
-    sNI.startForeground; 
-end
+% if ~isempty(find(abs(outQueue)>4, 1))
+%     error('Output must be within 4 V!');
+% else    
+%     queueOutputData(sNI,outQueue);
+% 
+%     sNI.startForeground; 
+% end
 %--------------------------------------------------------------------------
 disp('        [ End of Measurement ]        ')
 

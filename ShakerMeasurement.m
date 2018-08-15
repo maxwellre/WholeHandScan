@@ -74,16 +74,19 @@ activeInd = (18001-activeLen):18000;
 StimuliPath = './';
 % loadSig(1) = load([StimuliPath,'ActPfar.mat']);
 % loadSig(2) = load([StimuliPath,'ActPnear.mat']);
-loadSig(1) = load([StimuliPath,'ActPverynearYit.mat']);
-loadSig(2) = load([StimuliPath,'ActPmidYit.mat']);
-loadSig(3) = load([StimuliPath,'ActPveryfarYit.mat']);
+% loadSig(1) = load([StimuliPath,'ActPverynearYit.mat']);
+% loadSig(2) = load([StimuliPath,'ActPmidYit.mat']);
+% loadSig(3) = load([StimuliPath,'ActPveryfarYit.mat']);
+loadSig(1) = load([StimuliPath,'ActPnearYitFineLF.mat']);
+loadSig(2) = load([StimuliPath,'ActPmidYitFineLF.mat']);
+loadSig(3) = load([StimuliPath,'ActPfarYitFineLF.mat']);
 
 for i = 1:sig_num
     for j = 1:comboNum
         temp = (loadSig(j).TimeDomAct)';
         temp = diff(temp);
         temp = temp./max(abs(temp));
-        outQueue = [outQueue;temp(1:0.2*Fs);];  
+        outQueue = [outQueue;temp(1:1*Fs);];  
 %         outQueue = [outQueue;temp;zeros(0.5*Fs,1)];  
     end
 end

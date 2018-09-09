@@ -62,7 +62,7 @@ end
 
 % -------------------------------------------------------------------------
 % Prepare Stimuli
-sig_num = 100;
+sig_num = 10;
 AOData.sigLabel = sprintfc('Rep%d',1:sig_num);
 AOData.comboLabel = {'1','2','3'};
 comboNum = length(AOData.comboLabel);
@@ -77,17 +77,22 @@ StimuliPath = './';
 % loadSig(1) = load([StimuliPath,'ActPverynearYit.mat']);
 % loadSig(2) = load([StimuliPath,'ActPmidYit.mat']);
 % loadSig(3) = load([StimuliPath,'ActPveryfarYit.mat']);
-loadSig(1) = load([StimuliPath,'ActPnearYitFineLF.mat']);
-loadSig(2) = load([StimuliPath,'ActPmidYitFineLF.mat']);
-loadSig(3) = load([StimuliPath,'ActPfarYitFineLF.mat']);
+% loadSig(1) = load([StimuliPath,'ActPnearYitFineLF.mat']);
+% loadSig(2) = load([StimuliPath,'ActPmidYitFineLF.mat']);
+% loadSig(3) = load([StimuliPath,'ActPfarYitFineLF.mat']);
+loadSig(1) = load([StimuliPath,'ActPnearYit50ms.mat']);
+loadSig(2) = load([StimuliPath,'ActPmidYit50ms.mat']);
+loadSig(3) = load([StimuliPath,'ActPfarYit50ms.mat']);
 
 for i = 1:sig_num
     for j = 1:comboNum
-        temp = (loadSig(j).TimeDomAct)';
+        temp = (loadSig(2).TimeDomAct)';
+%         temp = (loadSig(j).TimeDomAct)';
         temp = diff(temp);
         temp = temp./max(abs(temp));
-        outQueue = [outQueue;temp(1:1*Fs);];  
-%         outQueue = [outQueue;temp;zeros(0.5*Fs,1)];  
+        outQueue = [outQueue;temp]; 
+%         outQueue = [outQueue;temp(1:0.1*Fs);];  
+%         outQueue = [outQueue;temp(1:0.05*Fs);zeros(0.15*Fs,1)];  
     end
 end
 

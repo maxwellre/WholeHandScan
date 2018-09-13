@@ -6,10 +6,10 @@ clear all
 Fs = 20000; % Sampling Frequency (Hz)
 dt = 1/Fs; % Sampling duration (secs)
 SignalDuration = 1; % Signal duration (secs)
-ExtraMeasureLen = 0.2*Fs; % 200 ms extra measurement time
 
-beginSig = zeros(0.02*Fs,1); % Pause 20 ms at beginning trials
+beginSig = zeros(0.1*Fs,1); % Pause 100 ms at beginning trials
 pauseSig = zeros(0.1*Fs,1); % Pause 100 ms between trials
+extraSig = zeros(0.4*Fs,1); % 400 ms extra measurement time
 
 t = (dt:dt:SignalDuration)'; % Time stamps
 
@@ -36,7 +36,7 @@ switch signalType
             hann_win = hann(length(temp));
             temp = temp.*hann_win;
             
-            spectAnalysis(temp, Fs);
+            spectAnalysis(temp, Fs, 1);
             
             outSig = [outSig;temp;pauseSig];
         end
@@ -50,11 +50,18 @@ switch signalType
 
         outSig = beginSig;
         for i = 1:length(f_bprn)
-            RN_sig = randn(round(cycle_num*Fs/f_bprn(i)),1);
+            if f_bprn(i) >= 160
+              RN_sig = randn(round(cycle_num*Fs/160),1);
+            else
+                RN_sig = randn(round(cycle_num*Fs/f_bprn(i)),1);
+            end
             band_width = (0.1*f_bprn(i));
             
+            subplot(2,1,1)
+            spectAnalysis(RN_sig, Fs, 0.001);
+            
 %             bpFilter = designfilt('bandpassfir', ... % Response type
-%                'FilterOrder',100, ...            % Filter order
+%                'FilterOrder',400, ...            % Filter order
 %                'CutoffFrequency1',f_bprn(i)-band_width,...
 %                'CutoffFrequency2',f_bprn(i)+band_width,...
 %                'SampleRate',Fs);               % Sample rate
@@ -62,12 +69,13 @@ switch signalType
             
             temp = bandpass(RN_sig,[f_bprn(i)-band_width,...
                 f_bprn(i)+band_width],Fs,...
-                'ImpulseResponse','iir','Steepness',0.95);
+                'ImpulseResponse','iir','Steepness',0.7);
             
-            hann_win = hann(length(temp));
-            temp = temp.*hann_win;
+%             hann_win = hann(length(temp));
+%             temp = temp.*hann_win;
             
-            spectAnalysis(temp, Fs);
+            subplot(2,1,2)
+            spectAnalysis(temp, Fs, 0.1);
             
             outSig = [outSig;temp;pauseSig];
         end
@@ -99,7 +107,7 @@ switch signalType
         saveName = 'TapPulseTrain';
         
     case 4
-        t_delay = (0:0.2:10)/1000; % (secs)
+        t_delay = (0:1:20)/1000; % (secs)
         impulse_width = 0.0005; % (secs)
         impulse_period = 0.1; % (secs)
         
@@ -135,7 +143,8 @@ switch signalType
 %         saveName = 'GaborPulseTrain';
         
 end
-SN = length(outSig) +ExtraMeasureLen; % Sample Number
+outSig = [outSig;extraSig];
+SN = length(outSig); % Sample Number
 RF = Fs/length(outSig); % Repeating Frequency (Hz)
 saveName = [saveName,sprintf('_SN-%d_RF-%.6f.txt',SN,RF)];
 disp(['Prepare: ',saveName]);
@@ -147,7 +156,7 @@ fprintf(file_id, '%f\n', outSig);
 fclose(file_id);
 
 %% Local function: Spectrum Analysis
-function spectAnalysis(data_in, Fs)
+function spectAnalysis(data_in, Fs, delayT)
 [spect,freq]=powerSpectrum(data_in, Fs);
 avg_freq = sum(freq'.*(spect/sum(spect)));
 
@@ -161,7 +170,7 @@ text(freq(peakInd)+10,0.01,sprintf('Avg. Freq = %.0f Hz',avg_freq));
 hold off
 xlim([0 800]);
 xlabel('Frequency (Hz)');
-pause(1);
+pause(delayT);
 end
 %% Local function: FFT - Spectrum
 function [ abs_Y_fft, f ] = powerSpectrum( input_data, Fs )

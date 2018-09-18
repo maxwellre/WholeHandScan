@@ -3,7 +3,9 @@
 % -------------------------------------------------------------------------
 clear all
 % -------------------------------------------------------------------------
-Fs = 20000; % Sampling Frequency (Hz)
+% Fs = 20000; % Sampling Frequency (Hz)
+Fs = 125000; % Maximum Sampling Frequency (Hz)
+
 dt = 1/Fs; % Sampling duration (secs)
 SignalDuration = 1; % Signal duration (secs)
 
@@ -18,7 +20,7 @@ t = (dt:dt:SignalDuration)'; % Time stamps
 % 2: Impulse Train
 % 3: Tapping Impulse Train
 % 4: ImpulsePair
-signalType = 4; 
+signalType = 2; 
 
 outSig = [];
 saveName = [];
@@ -84,8 +86,8 @@ switch signalType
         
     case 2
         impulse_width = 0.0005; % (secs)
-        impulse_period = 0.1; % (secs)
-        impulse_num = SignalDuration/impulse_period;
+        impulse_period = 0.16; % (secs)
+        impulse_num = floor(1.6*SignalDuration/impulse_period);
 
         temp = zeros(impulse_period*Fs,1);
         temp(1:impulse_width*Fs) = 1;
@@ -96,8 +98,8 @@ switch signalType
         
     case 3
         impulse_width = 0.01; % (secs)
-        impulse_period = 0.1; % (secs)
-        impulse_num = SignalDuration/impulse_period;
+        impulse_period = 0.16; % (secs)
+        impulse_num = floor(1.6*SignalDuration/impulse_period);
 
         temp = zeros(impulse_period*Fs,1);
         temp(1:impulse_width*Fs) = 1;

@@ -20,7 +20,7 @@ t = (dt:dt:SignalDuration)'; % Time stamps
 % 2: Impulse Train
 % 3: Tapping Impulse Train
 % 4: ImpulsePair
-signalType = 2; 
+signalType = 3; 
 
 outSig = [];
 saveName = [];

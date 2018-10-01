@@ -1,5 +1,8 @@
-%% Touch Amp Signal Preparation
+%% Convert PDV data from ASCII to .mat file
+% Created on 09/28/2018
+% -------------------------------------------------------------------------
 Path_Source = 'TapDigitII_Volar_SBJ1/';
+% Path_Source = 'TapDigitII_Dorsal_SBJ1/';
 
 Fs = 20000; % Expected Sampling Frequency (Hz)
 dt = 1/Fs; % Expected Sampling duration (secs)
@@ -34,7 +37,7 @@ for i = 1:path_len
     dataInfo.Unit = fgetl(fileID);
     a_data = textscan(fileID,'%s');
 
-    posiStr = regexp(dataInfo.Position,'\d+\.?\d*','match');
+    posiStr = regexp(dataInfo.Position,'-?+\d+\.?\d*','match')
     for j = 1:4
         PDV_data.Posi(j,i) = str2double(posiStr{j});
     end

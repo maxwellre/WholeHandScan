@@ -3,7 +3,7 @@ function [pointPosi] = findMP( pointMap, pointNum, PRadSqr)
 % (Previously a local function inside "gMapConfig.m".)
 % Locate position of the center of points indicated in green dots
 %------------------------------------------------------------------
-[rowP,colP] = find(pointMap == 255);
+[rowP,colP] = find(pointMap >= 250);
 
 % Pinpoint center - point with radius of 16px in a 4096-by-4096px map
 if nargin < 3

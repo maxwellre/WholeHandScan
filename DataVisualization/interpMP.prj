@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.coder" plugin-version="R2016a">
-  <configuration build-checksum="3215199883" file="D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization\interpMP.prj" location="D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization" name="interpMP" target="target.unifiedcoder" target-name="MATLAB Coder">
+  <configuration build-checksum="1521813876" file="D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization\interpMP.prj" location="D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization" name="interpMP" target="target.unifiedcoder" target-name="MATLAB Coder">
     <profile key="profile.mex">
       <param.BuiltInstrumentedMex>false</param.BuiltInstrumentedMex>
       <param.RanInstrumentedMex>false</param.RanInstrumentedMex>
@@ -769,6 +769,7 @@
     <param.objective>option.objective.c</param.objective>
     <param.WorkflowStep>workflowSummary</param.WorkflowStep>
     <param.TestSnippets>
+      <item>interpMP(maskImg, MP_Posi, tavgData,maskThreshold, interp_radius, Alpha, C, px2mm);</item>
       <item>interpMP(maskImg, MP_Posi, tavgData,maskThreshold, interp_radius, Alpha, Range);</item>
       <item>interpMP(maskImg, MP_Posi, tavgData,maskThreshold, interp_radius, Alpha);</item>
       <item>interpMP(maskImg, MP_Posi, tavgData, interp_radius, Alpha)</item>
@@ -790,7 +791,7 @@
     <param.AutoInferUnboundedSizeThreshold>2048</param.AutoInferUnboundedSizeThreshold>
     <param.EnableFixedPointStep>false</param.EnableFixedPointStep>
     <param.EnableScreener>true</param.EnableScreener>
-    <param.AnnotationChecksum>2206066717</param.AnnotationChecksum>
+    <param.AnnotationChecksum>3431170357</param.AnnotationChecksum>
     <var.LegacyTarget />
     <var.MirrorOnOpen>false</var.MirrorOnOpen>
     <param.FixedPointEnabled>false</param.FixedPointEnabled>
@@ -799,12 +800,12 @@
     <param.unifiedParamStorage />
     <var.gc.lastOutputRoot>codegen\lib\interpMP</var.gc.lastOutputRoot>
     <var.gc.lastOutputType>C_CODE</var.gc.lastOutputType>
-    <var.gc.preBuildChecksum>2950302625</var.gc.preBuildChecksum>
+    <var.gc.preBuildChecksum>1254820958</var.gc.preBuildChecksum>
     <var.cfi.lastOutputRoot>codegen\mex\interpMP</var.cfi.lastOutputRoot>
-    <var.cfi.preBuildChecksum>3205095071</var.cfi.preBuildChecksum>
-    <var.lastCfiTestSnippet>interpMP(maskImg, MP_Posi, tavgData,maskThreshold, interp_radius, Alpha);</var.lastCfiTestSnippet>
+    <var.cfi.preBuildChecksum>1511577952</var.cfi.preBuildChecksum>
+    <var.lastCfiTestSnippet>interpMP(maskImg, MP_Posi, tavgData,maskThreshold, interp_radius, Alpha, C, px2mm);</var.lastCfiTestSnippet>
     <var.outdatedOnRestore>false</var.outdatedOnRestore>
-    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization\interpMP.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;2931409519&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization\interpMP.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;2683859961&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
     <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;D:\Yitian\OneDrive - ece.ucsb.edu\WholeHandScan\DataVisualization\interpMP.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
     <param.forceMexBuild>false</param.forceMexBuild>
     <param.configImportActive>false</param.configImportActive>
@@ -971,7 +972,7 @@
     </unset>
     <fileset.entrypoints>
       <file custom-data-expanded="false" value="${PROJECT_ROOT}\interpMP.m">
-        <Marker>1538427572515</Marker>
+        <Marker>1538510542744</Marker>
       </file>
     </fileset.entrypoints>
     <fileset.testbench />
@@ -984,7 +985,8 @@
           <Input Name="maskThreshold" typeId="3" />
           <Input Name="interp_radius" typeId="3" />
           <Input Name="Alpha" typeId="3" />
-          <Input Name="Range" typeId="3" />
+          <Input Name="C" typeId="3" />
+          <Input Name="px2mm" typeId="4" />
           <idpTable>
             <type typeId="0">
               <Class>uint8</Class>
@@ -1018,6 +1020,15 @@
               <Value />
               <InitialValue />
               <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+            <type typeId="4">
+              <Class>double</Class>
+              <Size>1 x 1</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>true</UserDefined>
               <Complex>false</Complex>
               <Sparse>false</Sparse>
             </type>

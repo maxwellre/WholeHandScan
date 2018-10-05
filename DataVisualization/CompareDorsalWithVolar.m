@@ -3,9 +3,10 @@
 % -------------------------------------------------------------------------
 MapPath = './VisualMap/';
 
-Alpha = 30;
-Range = 200;
-interp_radius = 300;
+Alpha = 25.5; % (mm)
+C = 0.3;
+px2mm = 0.289;  % (mm/pixel)
+interp_radius = 200;
 maskThreshold = 200;
 
 %% Dorsal
@@ -34,8 +35,9 @@ MP_ID = PDV_data.Posi(1,:);
 [~, ID_ind] = sort(MP_ID);
 tavgData = tavgData(ID_ind);
 
+figure('Position',[60,20,820,940],'Color','w')
+
 pointImg_Dorsal = imread([MapPath,'Dorsal_MP.jpg']);
-figure('Position',[60,80,1800,640])
 subplot(2,2,1)
 colormap(jet(1000));
 imshow(pointImg_Dorsal)
@@ -44,18 +46,18 @@ imshow(pointImg_Dorsal)
 % end
 tavgData = tavgData./max(tavgData);
 hold on
-scatter(MP_Posi(:,2),MP_Posi(:,1),30,tavgData,'filled');
+scatter(MP_Posi(:,2),MP_Posi(:,1),20,tavgData,'filled');
 hold off
-title('PDV Measurement')
+title('PDV Measurement (Dorsal)')
 
 interpImg = interpMP_mex(maskImg_Dorsal, MP_Posi, tavgData,...
-    maskThreshold, interp_radius, Alpha, Range);
+    maskThreshold, interp_radius, Alpha, C, px2mm);
 
 subplot(2,2,3)
 surf(flipud(interpImg),'EdgeColor','none');
 view(2)
 axis equal; axis off;
-title('Interpolated Measurement')
+title('Interpolated Measurement (Dorsal)')
 
 %% Volar 
 maskImg_Volar = imread([MapPath,'Volar_Mask.jpg']);
@@ -92,17 +94,19 @@ imshow(pointImg_Volar)
 % end
 tavgData = tavgData./max(tavgData);
 hold on
-scatter(MP_Posi(:,2),MP_Posi(:,1),30,tavgData,'filled');
+scatter(MP_Posi(:,2),MP_Posi(:,1),20,tavgData,'filled');
 hold off
-title('PDV Measurement')
+title('PDV Measurement (Volar)')
 
 interpImg = interpMP_mex(maskImg_Volar, MP_Posi, tavgData,...
-    maskThreshold, interp_radius, Alpha, Range);
+    maskThreshold, interp_radius, Alpha, C, px2mm);
 
 % figure('Position',[20,50,1800,840])
 subplot(2,2,4)
 surf(flipud(interpImg),'EdgeColor','none');
 view(2)
 axis equal; axis off;
-title('Interpolated Measurement')
+title('Interpolated Measurement (Volar)')
 
+%%
+print(gcf,'PDV500Measure','-dpdf','-fillpage','-r600','-painters')

@@ -1,7 +1,7 @@
 %% Visualize PDV data
 % Created on 09/29/2018
 % -------------------------------------------------------------------------
-MapPath = './VisualMap/';
+MapPath = './TapDigitII_SBJ1/';
 
 Alpha = 25.5; % (mm)
 C = 0.3;
@@ -14,12 +14,11 @@ maskImg_Dorsal = imread([MapPath,'Dorsal_Mask.jpg']);
 maskImg_Dorsal = rgb2gray(maskImg_Dorsal);
 pointImg_Dorsal = imread([MapPath,'Dorsal_MP.jpg']);
 
-% Compute the optical flow vector locations based on dot maps--------------
-locator_num = 348; % Stream line locator number (74)
+locator_num = 348; 
 pointImg_Dorsal = pointImg_Dorsal(:,:,2); % Green points
 
 % Low pass filter the chosen grid and computable area
-lpF=ones(3)/9; % 3-by-3 mean filter
+lpF = ones(3)/9; % 3-by-3 mean filter
 ptImg_PFilter=uint8(filter2(lpF,pointImg_Dorsal));
 MP_Posi = findMP(ptImg_PFilter, locator_num);
 MP_Posi = round(MP_Posi); % Round the position to get index
@@ -29,7 +28,7 @@ MP_Score = cumsum([0; xDiff]).*10000 + MP_Posi(:,1);
 [~,ind] = sort(MP_Score);
 MP_Posi = MP_Posi(ind,:);
 
-load('TapDigitII_Dorsal.mat');
+load([MapPath,'TapDigitII_Dorsal.mat']);
 tavgData = rms(PDV_data.Data,1);
 MP_ID = PDV_data.Posi(1,:);
 [~, ID_ind] = sort(MP_ID);
@@ -41,9 +40,9 @@ pointImg_Dorsal = imread([MapPath,'Dorsal_MP.jpg']);
 subplot(2,2,1)
 colormap(jet(1000));
 imshow(pointImg_Dorsal)
-% for i = 1:locator_num
-%     text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
-% end
+for i = 1:locator_num
+    text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
+end
 tavgData = tavgData./max(tavgData);
 hold on
 scatter(MP_Posi(:,2),MP_Posi(:,1),20,tavgData,'filled');
@@ -64,8 +63,7 @@ maskImg_Volar = imread([MapPath,'Volar_Mask.jpg']);
 maskImg_Volar = rgb2gray(maskImg_Volar);
 pointImg_Volar = imread([MapPath,'Volar_MP.jpg']);
 
-% Compute the optical flow vector locations based on dot maps--------------
-locator_num = 348; % Stream line locator number (74)
+locator_num = 348;
 pointImg_Volar = pointImg_Volar(:,:,2); % Green points
 
 % Low pass filter the chosen grid and computable area
@@ -79,7 +77,7 @@ MP_Score = cumsum([0; xDiff]).*10000 + MP_Posi(:,1);
 [~,ind] = sort(MP_Score);
 MP_Posi = MP_Posi(ind,:);
 
-load('TapDigitII_Volar.mat');
+load([MapPath,'TapDigitII_Volar.mat']);
 tavgData = rms(PDV_data.Data,1);
 MP_ID = PDV_data.Posi(1,:);
 [~, ID_ind] = sort(MP_ID);
@@ -109,4 +107,4 @@ axis equal; axis off;
 title('Interpolated Measurement (Volar)')
 
 %%
-print(gcf,'PDV500Measure','-dpdf','-fillpage','-r600','-painters')
+% print(gcf,'PDV500Measure','-dpdf','-fillpage','-r600','-painters')

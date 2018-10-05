@@ -40,9 +40,9 @@ pointImg_Dorsal = imread([MapPath,'Dorsal_MP.jpg']);
 subplot(2,2,1)
 colormap(jet(1000));
 imshow(pointImg_Dorsal)
-for i = 1:locator_num
-    text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
-end
+% for i = 1:locator_num
+%     text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
+% end
 tavgData = tavgData./max(tavgData);
 hold on
 scatter(MP_Posi(:,2),MP_Posi(:,1),20,tavgData,'filled');

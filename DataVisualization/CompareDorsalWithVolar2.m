@@ -21,9 +21,15 @@ end
 
 locator_num = size(y,1);
 for i = 1:locator_num
-    pt_i = GetIndexOfPoint(DataPath,i);
+    try
+        pt_i = GetIndexOfPoint(DataPath,i);
+    catch
+        warning(sprintf('Error occurred reading point %d',i));
+    end
+    
     if (pt_i ~= i)
-        error('Measurement point index mismatch!')
+        warning(sprintf('Measurement point index mismatch! %d ~= %d',...
+            pt_i,i));
     end
 end
 
@@ -79,9 +85,15 @@ end
 
 locator_num = size(y,1);
 for i = 1:locator_num
-    pt_i = GetIndexOfPoint(DataPath,i);
+    try
+        pt_i = GetIndexOfPoint(DataPath,i);
+    catch
+        warning(sprintf('Error occurred reading point %d',i));
+    end
+    
     if (pt_i ~= i)
-        error('Measurement point index mismatch!')
+        warning(sprintf('Measurement point index mismatch! %d ~= %d',...
+            pt_i,i));
     end
 end
 

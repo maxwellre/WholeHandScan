@@ -30,25 +30,25 @@ if ~exist('sNI','var')
     chNI0.TerminalConfig = 'SingleEndedNonReferenced';
     chNI0.Range = [-5,5]; % Input voltage range from -5 to 5V
 
-%     % Analog input channel (Accelerometer X-axis)
-%     chNI1 = sNI(1).addAnalogInputChannel('Dev3','ai1','Voltage');
-%     chNI1.TerminalConfig = 'SingleEndedNonReferenced';
-%     chNI1.Range = [0,3]; % Input voltage range from 0 to 5V
-%     
-%     % Analog input channel (Accelerometer Y-axis)
-%     chNI2 = sNI(1).addAnalogInputChannel('Dev3','ai2','Voltage');
-%     chNI2.TerminalConfig = 'SingleEndedNonReferenced';
-%     chNI2.Range = [0,3]; % Input voltage range from 0 to 5V
-%     
-%     % Analog input channel (Accelerometer Z-axis)
-%     chNI3 = sNI(1).addAnalogInputChannel('Dev3','ai3','Voltage');
-%     chNI3.TerminalConfig = 'SingleEndedNonReferenced';
-%     chNI3.Range = [0,3]; % Input voltage range from 0 to 5V
-%     
-%     % Analog input channel (reference signal)
-%     chNI4 = sNI(1).addAnalogInputChannel('Dev3','ai4','Voltage');
-%     chNI4.TerminalConfig = 'SingleEndedNonReferenced';
-%     chNI4.Range = [-5,5]; % Input voltage range from -5 to 5V
+    % Analog input channel (Accelerometer X-axis)
+    chNI1 = sNI(1).addAnalogInputChannel('Dev3','ai1','Voltage');
+    chNI1.TerminalConfig = 'SingleEndedNonReferenced';
+    chNI1.Range = [0,3]; % Input voltage range from 0 to 5V
+    
+    % Analog input channel (Accelerometer Y-axis)
+    chNI2 = sNI(1).addAnalogInputChannel('Dev3','ai2','Voltage');
+    chNI2.TerminalConfig = 'SingleEndedNonReferenced';
+    chNI2.Range = [0,3]; % Input voltage range from 0 to 5V
+    
+    % Analog input channel (Accelerometer Z-axis)
+    chNI3 = sNI(1).addAnalogInputChannel('Dev3','ai3','Voltage');
+    chNI3.TerminalConfig = 'SingleEndedNonReferenced';
+    chNI3.Range = [0,3]; % Input voltage range from 0 to 5V
+    
+    % Analog input channel (reference signal)
+    chNI4 = sNI(1).addAnalogInputChannel('Dev3','ai4','Voltage');
+    chNI4.TerminalConfig = 'SingleEndedNonReferenced';
+    chNI4.Range = [-5,5]; % Input voltage range from -5 to 5V
     
     % Analog output session -----------------------------------------------
     sNI(2) = daq.createSession('ni');   
@@ -71,15 +71,7 @@ outQueue = [];
 activeLen = 0.1*Fs;
 activeInd = (18001-activeLen):18000;
 
-StimuliPath = './';
-% loadSig(1) = load([StimuliPath,'ActPfar.mat']);
-% loadSig(2) = load([StimuliPath,'ActPnear.mat']);
-% loadSig(1) = load([StimuliPath,'ActPverynearYit.mat']);
-% loadSig(2) = load([StimuliPath,'ActPmidYit.mat']);
-% loadSig(3) = load([StimuliPath,'ActPveryfarYit.mat']);
-% loadSig(1) = load([StimuliPath,'ActPnearYitFineLF.mat']);
-% loadSig(2) = load([StimuliPath,'ActPmidYitFineLF.mat']);
-% loadSig(3) = load([StimuliPath,'ActPfarYitFineLF.mat']);
+StimuliPath = './OneDayTestData/';
 loadSig(1) = load([StimuliPath,'ActPnearYit50ms.mat']);
 loadSig(2) = load([StimuliPath,'ActPmidYit50ms.mat']);
 loadSig(3) = load([StimuliPath,'ActPfarYit50ms.mat']);

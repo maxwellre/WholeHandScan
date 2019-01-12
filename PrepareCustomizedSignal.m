@@ -3,8 +3,8 @@
 % -------------------------------------------------------------------------
 clear all
 % -------------------------------------------------------------------------
-% Fs = 20000; % Sampling Frequency (Hz)
-Fs = 125000; % Maximum Sampling Frequency (Hz)
+Fs = 20000; % Sampling Frequency (Hz)
+% Fs = 125000; % Maximum Sampling Frequency (Hz)
 
 dt = 1/Fs; % Sampling duration (secs)
 SignalDuration = 1; % Signal duration (secs)
@@ -20,7 +20,7 @@ t = (dt:dt:SignalDuration)'; % Time stamps
 % 2: Impulse Train
 % 3: Tapping Impulse Train
 % 4: ImpulsePair
-signalType = 3; 
+signalType = 1; 
 
 outSig = [];
 saveName = [];
@@ -59,8 +59,8 @@ switch signalType
             end
             band_width = (0.1*f_bprn(i));
             
-            subplot(2,1,1)
-            spectAnalysis(RN_sig, Fs, 0.001);
+%             subplot(2,1,1)
+%             spectAnalysis(RN_sig, Fs, 0.001);
             
 %             bpFilter = designfilt('bandpassfir', ... % Response type
 %                'FilterOrder',400, ...            % Filter order
@@ -75,9 +75,11 @@ switch signalType
             
 %             hann_win = hann(length(temp));
 %             temp = temp.*hann_win;
+
+            fprintf('BP freq = %.0f Hz - RMS = %.2f\n',f_bprn(i),rms(temp));
             
-            subplot(2,1,2)
-            spectAnalysis(temp, Fs, 0.1);
+%             subplot(2,1,2)
+%             spectAnalysis(temp, Fs, 0.1);
             
             outSig = [outSig;temp;pauseSig];
         end

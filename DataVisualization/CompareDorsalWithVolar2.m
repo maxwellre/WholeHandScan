@@ -12,7 +12,7 @@ interp_radius = 200;
 maskThreshold = 200;
 % -------------------------------------------------------------------------
 %% Dorsal
-DataPath = '../Data_TapDigitII/TapDigitII_SBJ2_125KHz/TapDigitII_Dorsal_SBJ2.svd';
+DataPath = '../Data_TapDigitII/TapDigitII_SBJ2/TapDigitII_Dorsal_SBJ2.svd';
 
 if ~exist('data_info','var')
     [t,y,data_info] = GetPointData(DataPath, 'Time', 'Vib', 'Velocity',...
@@ -76,7 +76,7 @@ title('Interpolated Measurement (Dorsal)')
 %% Volar
 clearvars -except MapPath Alpha C px2mm interp_radius maskThreshold
 
-DataPath = '../Data_TapDigitII/TapDigitII_SBJ2_125KHz/TapDigitII_Volar_SBJ2.svd';
+DataPath = '../Data_TapDigitII/TapDigitII_SBJ2/TapDigitII_Volar_SBJ2.svd';
 
 if ~exist('data_info','var')
     [t,y,data_info] = GetPointData(DataPath, 'Time', 'Vib', 'Velocity',...

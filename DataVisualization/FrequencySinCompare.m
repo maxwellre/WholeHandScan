@@ -55,6 +55,7 @@ MP_Score = cumsum([0; xDiff]).*10000 + MP_Posi(:,1);
 MP_Posi = MP_Posi(ind,:);
 
 % y_filt = movmedian(y',20)';
+y_filt = y;
 
 % -------------------------------------------------------------------------
 sinNum = 17;
@@ -91,30 +92,50 @@ legend(tavgData(:,2));
 hold off
 
 %% ------------------------------------------------------------------------
-figure('Position',[60,60,1840,880],'Color','w')
-for i = 1:sinNum
-    subplot(5,7,i)
-    colormap(jet(1000));
-    imshow(imread([MapPath,'DigitIISinusoid_MP.jpg']))
-%     for i = 1:locator_num
-%         text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
-%     end
-    hold on
-    scatter(MP_Posi(:,2),MP_Posi(:,1),5,tavgData{i,1},'filled');
-    hold off
-    if i == 1
-        ylabel('PDV Measurement')
-    end
-    title(tavgData{i,2})
-
+fig_h = figure('Position',[60,60,1640,580],'Color','w');
+colormap(jet(1000));
+slct_sin = [1,2,3,5,9,13,17];
+for i = 1:length(slct_sin)
     interpImg = interpMP(maskImg, MP_Posi, tavgData{i,1},...
         maskThreshold, interp_radius, Alpha, C, px2mm);
 
-    subplot(5,7,sinNum+i)
+%     subplot(1,length(slct_sin),i)
     surf(flipud(interpImg),'EdgeColor','none');
     view(2)
     axis equal; axis off;
-    if i == 1
-        ylabel('Interpolated Measurement')
-    end
+    print(fig_h,sprintf('./FreqCompareSine/FreqCompareSine%s',...
+        tavgData{i,2}),'-dpng')
+    pause(0.1);
 end
+
+
+% figure('Position',[60,60,1840,880],'Color','w')
+% for i = 1:sinNum
+%     subplot(5,7,i)
+%     colormap(jet(1000));
+%     imshow(imread([MapPath,'DigitIISinusoid_MP.jpg']))
+% %     for i = 1:locator_num
+% %         text(MP_Posi(i,2),MP_Posi(i,1),num2str(i),'Color','r')
+% %     end
+%     hold on
+%     scatter(MP_Posi(:,2),MP_Posi(:,1),5,tavgData{i,1},'filled');
+%     hold off
+%     if i == 1
+%         ylabel('PDV Measurement')
+%     end
+%     title(tavgData{i,2})
+% 
+%     interpImg = interpMP(maskImg, MP_Posi, tavgData{i,1},...
+%         maskThreshold, interp_radius, Alpha, C, px2mm);
+% 
+%     subplot(5,7,sinNum+i)
+%     surf(flipud(interpImg),'EdgeColor','none');
+%     view(2)
+%     axis equal; axis off;
+%     if i == 1
+%         ylabel('Interpolated Measurement')
+%     end
+% end
+% set(gcf,'PaperOrientation','landscape');
+% print(fig_h,'FreqSinCompare','-dpdf',...
+%     '-fillpage','-painters')

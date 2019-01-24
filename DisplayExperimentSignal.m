@@ -5,12 +5,12 @@ if ~exist('outSig','var')
     load('WHC2019FreqExpSignals.mat');
 end
 
-
 %% Spectrogram
 discardLen = round(pauseTimeInSec*Fs)-2000;
 
 fig_h = figure('Position',[60 120 800 860],'Color','w');
-colormap(flipud(hot(1000)));
+% colormap(flipud(hot(1000)));
+colormap((jet(1000)));
 for i = 1:4
     subplot(4,1,i)
     switch i
@@ -23,7 +23,7 @@ for i = 1:4
         case 4
             temp = outSig.rsB(discardLen:(end-discardLen));
     end
-    spectrogram(temp,1024,1000,1024,Fs,'yaxis'); ylim([0 0.8]);
+    spectrogram(temp,512,480,512,Fs,'yaxis'); ylim([0 0.8]);
     box off;
 end
 fprintf('Colorbar range: %.1f - %.1f\n',caxis);

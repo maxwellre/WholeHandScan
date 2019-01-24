@@ -67,8 +67,8 @@ onsite_ind = movmedian(double(zero_ind),19);
 onsite_ind = [0,diff(onsite_ind)];
 onsite_ind = (onsite_ind == -1);
 
-figure('Position',[60,60,1840,880],'Color','w')
-subplot(2,1,1)
+temp_fig = figure('Position',[60,60,1840,880],'Color','w');
+subplot(3,1,1)
 plot(onsite_ind);
 hold on
 plot(ref(1,:)./max(ref(1,:)));
@@ -78,7 +78,11 @@ seg_ind = find(onsite_ind == 1);
 seg_ind = [seg_ind, (2*seg_ind(end)-seg_ind(end-1))];
 hold off
 
-subplot(2,1,2)
+subplot(3,1,2)
+plot(t,y_filt(end,:));
+xlabel('Time (secs)'); ylabel('Velocity (mm/s)')
+
+subplot(3,1,3)
 hold on
 for i = 1:sinNum
     slct_ind = seg_ind(i):seg_ind(i+1);
@@ -87,25 +91,36 @@ for i = 1:sinNum
     plot(f,seg_spect); xlabel('Frequency (Hz)'); 
     tavgData{i,2} = sprintf('%.0fHz', f*(seg_spect./sum(seg_spect)));
     tavgData{i,1} = rms(y_filt(:,slct_ind),2)';
+    
+    fprintf('%s maximum amplitude = %f (um/s)\n',tavgData{i,2},...
+        1000*max(tavgData{i,1}));
 end
 legend(tavgData(:,2));
 hold off
 
+close(temp_fig);
+
 %% ------------------------------------------------------------------------
-fig_h = figure('Position',[60,60,1640,580],'Color','w');
+fig_h = figure('Position',[60,60,840,580],'Color','w');
 colormap(jet(1000));
 slct_sin = [1,2,3,5,9,13,17];
 for i = 1:length(slct_sin)
     interpImg = interpMP(maskImg, MP_Posi, tavgData{i,1},...
         maskThreshold, interp_radius, Alpha, C, px2mm);
-
-%     subplot(1,length(slct_sin),i)
+    
+    interpImg(:,1:580) = NaN;
+    
     surf(flipud(interpImg),'EdgeColor','none');
     view(2)
     axis equal; axis off;
-    print(fig_h,sprintf('./FreqCompareSine/FreqCompareSine%s',...
-        tavgData{i,2}),'-dpng')
-    pause(0.1);
+    
+    fprintf('%s [%.1f - %.1f um/s]\n',tavgData{slct_sin(i),2},1000*caxis);
+    
+    set(gca, 'units', 'normalized'); 
+
+%     print(fig_h,sprintf('./FreqCompareSine/FreqCompareSine%s',...
+%         tavgData{slct_sin(i),2}),'-dpng')
+%     pause(0.1);
 end
 
 

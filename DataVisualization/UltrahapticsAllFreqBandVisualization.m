@@ -3,7 +3,7 @@
 % -------------------------------------------------------------------------
 % clear all
 % -------------------------------------------------------------------------
-is1ms = 0; % 1: 1m/s, otherwise: 11m/s
+is1ms = 1; % 1: 1m/s, otherwise: 11m/s
 
 if is1ms
     dataName = 'Greg_MovingSpot_1ms_Dir1';
@@ -93,7 +93,7 @@ discard_ind = [19, 20, 38, 39, 48, 49, 58, 68, 69, 79, 80, 176, 190, 193, 205, 2
     220, 222, 225, 228, 233, 247, 283, 289];
 
 if is1ms
-    discard_ind = [discard_ind, 2,26,37,67,74, 144, 219,223, 242, 281];
+    discard_ind = [discard_ind, 2,26,37,67,74, 94, 106,144, 219,223, 242, 281];
 else
     discard_ind = [discard_ind, 8, 99, 120, 138, 144, 158, 195, 200, 277];
 end
@@ -143,27 +143,34 @@ else
 end
 
 for i = 0:frame_num
+% for i = 801:900
     slct_ind = i*avgWinLen+(1:(2*avgWinLen));
     y_rect = [y_rect;rms(hammWin.*filteredData(slct_ind,:))]; % RMS Rectify
     y_avg = [y_avg;mean(hammWin.*filteredData(slct_ind,:))]; % (Bipolar)
 end
 
-% y_avg = y_rect;
+y_avg = y_rect;
+
 %% Plot selected frames
-if 0 %---------------------------------------------------------------switch
+if 1 %---------------------------------------------------------------switch
 
 row_num = 3;
 % slct_frame = -1+(24:10:104);
-slct_frame = 155:50:1250;
+slct_frame = (0:100:990)+50+2;
+% slct_frame = (0:100:900)+10+2;
+% slct_frame = 1:5:size(y_avg,1);
 
 frame_num = length(slct_frame);
 
 y_slct = y_avg(slct_frame,:);
-colorRange = [min(y_slct(:)),max(y_slct(:))*0.7*17/Alpha];
+% colorRange = [min(y_slct(:)),max(y_slct(:))*0.7*17/Alpha];
+% colorRange = [-0.0002, 0.0002];
+colorRange = [0, 0.00016];
+% colorRange = [-0.00016, 0.00016];
 
 curr_fig = figure('Position',[60,60,1840,580],'Color','w','Name',...
     sprintf('Bandpass [%d - %d Hz]',freqBand(f_i),freqBand(f_i+1)));
-colorRange = [min(y_slct(:)),max(y_slct(:))*0.8*17/Alpha];
+
 colormap(jet(1000));
 for i = 1:frame_num
     subplot(row_num,ceil(frame_num/row_num),i)
@@ -193,7 +200,7 @@ end
 end %------------------------------------------------------------switch end 
 
 %% Produce Videos
-if 1 %---------------------------------------------------------------switch
+if 0 %---------------------------------------------------------------switch
     
 % Image coordinates
 [meshX,meshY] = meshgrid(1:size(maskImg,2),1:size(maskImg,1));
@@ -221,9 +228,7 @@ colormap(jet(1000));
 focus_Posi = NaN(size(y_avg,1),2);
 for i = 1:size(y_avg,1)
 interpImg = interpMP(maskImg, MP_Posi(remain_ind,:), y_avg(i,:),...
-        maskThreshold, interp_radius, Alpha, C, px2mm);      
-% surf(flipud(interpImg),'EdgeColor','none');
-
+        maskThreshold, interp_radius, Alpha, C, px2mm);          
 sc_h = imagesc(interpImg); 
 set(sc_h,'AlphaData',~isnan(interpImg));
 caxis(colorRange);
@@ -232,11 +237,24 @@ axis equal; axis off;
 title(sprintf('(%d) [%d - %d Hz] Time = %.1f ms',i,...
     freqBand(f_i),freqBand(f_i+1),i*avgWinLen*1000/Fs))
 
-valid_ind = ~isnan(interpImg);
-Phi = exp(200000*interpImg(valid_ind))';
-Phi = Phi./sum(Phi);
-focus_Posi(i,2) = Phi*meshX(valid_ind);
-focus_Posi(i,1) = Phi*meshY(valid_ind);
+% Track the focus point
+trackImg = interpMP(maskImg, MP_Posi(remain_ind,:), y_rect(i,:),...
+        maskThreshold, interp_radius, Alpha, C, px2mm); 
+valid_ind = ~isnan(trackImg);
+Phi = exp(200000*trackImg(valid_ind))';
+if is1ms
+    Phi(Phi < 2e7) = 0;
+else
+    Phi(Phi < 2e7) = 0;
+end
+
+if sum(Phi > 0)
+    Phi = Phi./sum(Phi);
+    focus_Posi(i,2) = Phi*meshX(valid_ind);
+    focus_Posi(i,1) = Phi*meshY(valid_ind);
+else
+    focus_Posi(i,:) = [-100 -100]; 
+end
 
 hold on
 scatter(focus_Posi(i,2), focus_Posi(i,1),1200,'k','Linewidth',1);

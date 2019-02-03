@@ -180,11 +180,18 @@ colormap(jet(1000));
 if is1ms
     subplot_width = 0.098;
 else
+<<<<<<< HEAD
     subplot_width = 0.098;
+=======
+>>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
 end
 
 for i = 1:frame_num
 %     subplot(row_num,ceil(frame_num/row_num),i)
+<<<<<<< HEAD
+=======
+%     subplot('Position',[0.005+(i-1)*0.11,0.2,0.11,0.6])    
+>>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
     subplot('Position',[0.005+(i-1)*subplot_width,0.2,subplot_width,0.6]);  
     
     interpImg = interpMP(maskImg, MP_Posi(remain_ind,:),...

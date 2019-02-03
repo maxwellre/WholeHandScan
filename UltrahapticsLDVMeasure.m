@@ -237,7 +237,7 @@ function saveData(~, ~, p_h, s_h)
         
         Fs = AIData.Fs;
         cosTheta = AIData.cosTheta;
-        file_name = 'TouchAmp_measure';
+        file_name = 'NewData';
         save(file_name,'LDVvel','refSig','Fs','cosTheta');
         p_h(6).String = [file_name,' Saved'];
         disp(p_h(6).String);

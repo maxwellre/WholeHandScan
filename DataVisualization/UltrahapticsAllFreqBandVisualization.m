@@ -3,7 +3,7 @@
 % -------------------------------------------------------------------------
 % clear all
 % -------------------------------------------------------------------------
-is1ms = 1; % 1: 1m/s, otherwise: 11m/s
+is1ms = 0; % 1: 1m/s, otherwise: 11m/s
 
 if is1ms
     dataName = 'Greg_MovingSpot_1ms_Dir1';
@@ -153,12 +153,16 @@ y_avg = y_rect;
 
 %% Plot selected frames
 if 1 %---------------------------------------------------------------switch
-
 row_num = 3;
-% slct_frame = -1+(24:10:104);
-slct_frame = (0:100:990)+50+2;
-% slct_frame = (0:100:900)+10+2;
-% slct_frame = 1:5:size(y_avg,1);
+
+if is1ms
+    slct_frame = (0:100:990)+50+2; % (1m/s included in the paper)
+    % slct_frame = (0:100:900)+10+2; % (not good)
+    % slct_frame = 1:5:size(y_avg,1); % (test only);
+else 
+%     slct_frame = -1+(24:10:104);
+    slct_frame = -1+(24:9:106);
+end
 
 frame_num = length(slct_frame);
 
@@ -172,9 +176,16 @@ curr_fig = figure('Position',[60,60,1840,580],'Color','w','Name',...
     sprintf('Bandpass [%d - %d Hz]',freqBand(f_i),freqBand(f_i+1)));
 
 colormap(jet(1000));
+
+if is1ms
+    subplot_width = 0.098;
+else
+end
+
 for i = 1:frame_num
-    subplot(row_num,ceil(frame_num/row_num),i)
+%     subplot(row_num,ceil(frame_num/row_num),i)
 %     subplot('Position',[0.005+(i-1)*0.11,0.2,0.11,0.6])    
+    subplot('Position',[0.005+(i-1)*subplot_width,0.2,subplot_width,0.6]);  
     
     interpImg = interpMP(maskImg, MP_Posi(remain_ind,:),...
       y_slct(i,:),maskThreshold, interp_radius, Alpha, C, px2mm);      
@@ -182,19 +193,21 @@ for i = 1:frame_num
     caxis(colorRange);
     view(2)
     axis equal; axis off;
-    title(sprintf('(%d) Time = %.0f ms',slct_frame(i),...
-        slct_frame(i)*avgWinLen*1000/Fs))
-%     title(sprintf('%.1f ms',...
-%         (slct_frame(i)-slct_frame(1))*avgWinLen*1000/Fs));
+    
+%     title(sprintf('(%d) Time = %.0f ms',slct_frame(i),...
+%         slct_frame(i)*avgWinLen*1000/Fs))
+    title(sprintf('%.2f ms',...
+        (slct_frame(i)-slct_frame(1))*avgWinLen*1000/Fs));
+    
     drawnow;
     
-%     set(gca,'FontSize',16)   
-%     if i == round(0.5*frame_num)
-%         c_h = colorbar('Location','south','Ticks',[]);
-%         c_h.Label.String = sprintf('RMS Velocity %.1f - %.1f (mm/s)\n',...
-%             1000*colorRange);
-%         disp(c_h.Label.String{1});
-%     end
+    set(gca,'FontSize',16)   
+    if i == round(0.5*frame_num)
+        c_h = colorbar('Location','south','Ticks',[]);
+        c_h.Label.String = sprintf('RMS Velocity %.1f - %.1f (mm/s)\n',...
+            1000*colorRange);
+        disp(c_h.Label.String{1});
+    end
 end
 
 end %------------------------------------------------------------switch end 

@@ -6,9 +6,11 @@
 is1ms = 0; % 1: 1m/s, otherwise: 11m/s
 
 if is1ms
-    dataName = 'Greg_MovingSpot_1ms_Dir1';
+%     dataName = 'Greg_MovingSpot_1ms_Dir1';
+%     dataName = 'Greg_MovingSpot_1ms_Dir2';
 else
     dataName = 'Greg_MovingSpot_11ms_Dir1';
+%     dataName = 'Greg_MovingSpot_11ms_Dir2';
 end
 
 % -------------------------------------------------------------------------
@@ -149,7 +151,7 @@ for i = 0:frame_num
     y_avg = [y_avg;mean(hammWin.*filteredData(slct_ind,:))]; % (Bipolar)
 end
 
-y_avg = y_rect;
+% y_avg = y_rect;
 
 %% Plot selected frames
 if 1 %---------------------------------------------------------------switch
@@ -169,8 +171,9 @@ frame_num = length(slct_frame);
 y_slct = y_avg(slct_frame,:);
 % colorRange = [min(y_slct(:)),max(y_slct(:))*0.7*17/Alpha];
 % colorRange = [-0.0002, 0.0002];
-colorRange = [0, 0.00016];
+% colorRange = [0, 0.00016];
 % colorRange = [-0.00016, 0.00016];
+colorRange = [-0.0001, 0.0001];
 
 curr_fig = figure('Position',[60,60,1840,580],'Color','w','Name',...
     sprintf('Bandpass [%d - %d Hz]',freqBand(f_i),freqBand(f_i+1)));
@@ -180,18 +183,12 @@ colormap(jet(1000));
 if is1ms
     subplot_width = 0.098;
 else
-<<<<<<< HEAD
     subplot_width = 0.098;
-=======
->>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
 end
 
 for i = 1:frame_num
 %     subplot(row_num,ceil(frame_num/row_num),i)
-<<<<<<< HEAD
-=======
 %     subplot('Position',[0.005+(i-1)*0.11,0.2,0.11,0.6])    
->>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
     subplot('Position',[0.005+(i-1)*subplot_width,0.2,subplot_width,0.6]);  
     
     interpImg = interpMP(maskImg, MP_Posi(remain_ind,:),...

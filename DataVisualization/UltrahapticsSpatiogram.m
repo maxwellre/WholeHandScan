@@ -13,12 +13,10 @@ dataName = {'Greg_MovingSpot_1ms_Dir1','Greg_MovingSpot_1ms_Dir2',...
 dataNum = length(dataName);
 TrialNum = 2;
 
-<<<<<<< HEAD
 f_ticks = 40:40:1000;
 
 % for d_i = 1:dataNum
-=======
->>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
+
 for d_i = 1:dataNum
     for t_i = 1:TrialNum
     

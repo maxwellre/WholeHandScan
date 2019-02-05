@@ -3,14 +3,17 @@
 % -------------------------------------------------------------------------
 % clear all
 % -------------------------------------------------------------------------
-is1ms = 0; % 1: 1m/s, otherwise: 11m/s
+slctData = 3; 
 
-if is1ms
-%     dataName = 'Greg_MovingSpot_1ms_Dir1';
-%     dataName = 'Greg_MovingSpot_1ms_Dir2';
-else
-    dataName = 'Greg_MovingSpot_11ms_Dir1';
-%     dataName = 'Greg_MovingSpot_11ms_Dir2';
+switch slctData
+    case 1
+        dataName = 'Greg_MovingSpot_1ms_Dir1';
+    case 2
+        dataName = 'Greg_MovingSpot_1ms_Dir2';
+    case 3
+        dataName = 'Greg_MovingSpot_11ms_Dir1';
+    case 4
+        dataName = 'Greg_MovingSpot_11ms_Dir2';
 end
 
 % -------------------------------------------------------------------------
@@ -23,6 +26,8 @@ cleanDataPath1 = sprintf('../Data_Ultrahaptics/%s_1.mat',dataName);
 load(cleanDataPath1);
 
 Alpha = 25.5; % (mm)
+% Alpha = 32; % (mm)
+
 C = 0.4;
 px2mm = 0.289;  % (mm/pixel)
 interp_radius = 100;
@@ -36,6 +41,8 @@ if ~exist('data_info','var')
     
     [t_ref,ref,~] = GetPointData(DataPath, 'Time', 'Ref1', 'Voltage',...
         'Samples', 0, 0);
+    
+     XYZ = GetXYZCoordinates(DataPath, 0);
 end
 
 locator_num = size(y,1);
@@ -94,7 +101,7 @@ freqBandNum = length(freqBand)-1;
 discard_ind = [19, 20, 38, 39, 48, 49, 58, 68, 69, 79, 80, 176, 190, 193, 205, 216,...
     220, 222, 225, 228, 233, 247, 283, 289];
 
-if is1ms
+if slctData
     discard_ind = [discard_ind, 2,26,37,67,74, 94, 106,144, 219,223, 242, 281];
 else
     discard_ind = [discard_ind, 8, 99, 120, 138, 144, 158, 195, 200, 277];
@@ -105,7 +112,7 @@ remain_ind(discard_ind) = false;
 
 remainMP_Posi = MP_Posi(remain_ind,:);
 
-%% Display selected measurement points
+%% Display selected measurement points and provide distance measure
 temp_fig = figure('Position',[60,60,1840,880],'Color','w');
 imshow(imread([MapPath,'Greg_MovingSpot_1ms_Dir1_1_MP.jpg']))
 hold on;
@@ -118,8 +125,16 @@ for i = find(remain_ind == 0)
 end
 title(sprintf('%d Point Removed',sum(remain_ind == 0)));
 
-% scatter(MP_Posi(remain_ind,2),MP_Posi(remain_ind,1),20,y_avg(1,:),'filled');
+MP_Dist = ((MP_Posi(2:end,1)-MP_Posi(1,1)).^2+...
+    (MP_Posi(2:end,2)-MP_Posi(1,2)).^2).^0.5;
+MP_realDist = ((XYZ(2:end,1)-XYZ(1,1)).^2 +...
+    (XYZ(2:end,2)-XYZ(1,2)).^2 +...
+    (XYZ(2:end,3)-XYZ(1,3)).^2).^0.5; % Unit:m
+realToMap = median(MP_Dist./MP_realDist);
 
+fprintf('Real distance to image distance ratio = %f pixel/m\n',realToMap);
+
+% scatter(MP_Posi(remain_ind,2),MP_Posi(remain_ind,1),20,y_avg(1,:),'filled');
 hold off;
 
 close(temp_fig);
@@ -131,14 +146,17 @@ hammWin = repmat(hamming(2*avgWinLen),[1,sum(remain_ind)]);
 for f_i = 1:freqBandNum
 filteredData = bandpass(y_vib_sync(remain_ind,:)',...
     [freqBand(f_i),freqBand(f_i+1)],Fs);
+
+% filteredData = y_vib_sync(remain_ind,:)';
 % filteredData = highpass(y_vib_sync(remain_ind,:)',40,Fs);
+% filteredData = lowpass(filteredData,240,Fs);
 
 % plot(filteredData(1:28000,:));
 
 y_rect = [];
 y_avg = [];
 
-if is1ms
+if slctData
     frame_num = 1200;
 else
     frame_num = 120;
@@ -153,20 +171,87 @@ end
 
 % y_avg = y_rect;
 
+%% Estimate focus point path
+% Image coordinates
+[meshX,meshY] = meshgrid(1:size(maskImg,2),1:size(maskImg,1));
+switch slctData
+    case 1
+    case 2
+    case 3
+        estim_frame = 32:114;
+        focus_speed = 11*realToMap; % (pixel/sec);
+    case 4
+end
+frame_num = length(estim_frame);
+focus_Posi = NaN(frame_num,2);
+wb_h = waitbar(0, 'O', 'Name','Estimating focus point path ...');
+for i = 1:frame_num
+    waitbar(i/frame_num,wb_h,sprintf('Frame %d',i));
+    % Track the focus point
+    trackImg = interpMP(maskImg, MP_Posi(remain_ind,:),...
+        y_rect(estim_frame(i),:), maskThreshold, interp_radius, Alpha,...
+        C, px2mm); 
+    valid_ind = ~isnan(trackImg);
+    Phi = exp(200000*trackImg(valid_ind))';
+    
+    switch slctData
+        case 1
+            Phi(Phi < 2e7) = 0;
+        case 3
+            Phi(Phi < 2e7) = 0;
+    end
+
+    if sum(Phi > 0)
+        Phi = Phi./sum(Phi);
+        focus_Posi(i,2) = Phi*meshX(valid_ind);
+        focus_Posi(i,1) = Phi*meshY(valid_ind);
+    end
+end
+close(wb_h);
+valid_ind = ~isnan(focus_Posi(:,1));
+focus_Posi = focus_Posi(valid_ind,:);
+pf_h = polyfit(focus_Posi(:,1),focus_Posi(:,2),1);
+% focus_endPoints = [min(focus_Posi(:,1)),max(focus_Posi(:,1))];
+focus_endPoints = [focus_Posi(1,1),focus_Posi(end,1)];
+focus_fit2 = polyval(pf_h,focus_endPoints); 
+focus_endPoints = [focus_endPoints;focus_fit2];
+imshow(pointImg);
+hold on;
+plot(focus_endPoints(2,:),focus_endPoints(1,:),'-or')
+
+pathCosine = abs(focus_endPoints(1,2) - focus_endPoints(1,1))./...
+    (((focus_endPoints(1,2) - focus_endPoints(1,1)).^2+...
+    (focus_endPoints(2,2) - focus_endPoints(2,1)).^2).^0.5);
+
 %% Plot selected frames
 if 1 %---------------------------------------------------------------switch
 row_num = 3;
 
-if is1ms
-    slct_frame = (0:100:990)+50+2; % (1m/s included in the paper)
-    % slct_frame = (0:100:900)+10+2; % (not good)
-    % slct_frame = 1:5:size(y_avg,1); % (test only);
-else 
-%     slct_frame = -1+(24:10:104);
-    slct_frame = -1+(24:9:106);
+switch slctData
+    case 1
+        slct_frame = (0:100:990)+50+2; % (1m/s included in the paper)
+        % slct_frame = (0:100:900)+10+2; % (not good)
+        % slct_frame = 1:5:size(y_avg,1); % (test only);
+    case 3
+        frame_interval = 9;
+%         slct_frame = -1+(24:9:106);
+        slct_frame = 32:frame_interval:114;
 end
 
+
 frame_num = length(slct_frame);
+
+% focus_points = linspace(focus_endPoints(1,1),focus_endPoints(1,end),...
+%     frame_num);
+
+% (pixel/sec)*(cos[Theta])*(sample/frame)/(1/sec)*(frame indcies)
+focus_points = focus_endPoints(1,1) +...
+    (focus_speed*pathCosine*frame_interval*avgWinLen/Fs).*(0:frame_num-1);
+
+focus_fit2 = polyval(pf_h,focus_points); 
+focus_points = [focus_points;focus_fit2]';
+
+% plot(focus_points(:,2),focus_points(:,1),'*b')
 
 y_slct = y_avg(slct_frame,:);
 % colorRange = [min(y_slct(:)),max(y_slct(:))*0.7*17/Alpha];
@@ -180,29 +265,33 @@ curr_fig = figure('Position',[60,60,1840,580],'Color','w','Name',...
 
 colormap(jet(1000));
 
-if is1ms
-    subplot_width = 0.098;
-else
-    subplot_width = 0.098;
+switch slctData
+    case 1
+        subplot_width = 0.098;
+    case 3
+        subplot_width = 0.098;
 end
 
 for i = 1:frame_num
 %     subplot(row_num,ceil(frame_num/row_num),i)
-%     subplot('Position',[0.005+(i-1)*0.11,0.2,0.11,0.6])    
     subplot('Position',[0.005+(i-1)*subplot_width,0.2,subplot_width,0.6]);  
     
     interpImg = interpMP(maskImg, MP_Posi(remain_ind,:),...
       y_slct(i,:),maskThreshold, interp_radius, Alpha, C, px2mm);      
-    surf(flipud(interpImg),'EdgeColor','none');
+    sc_h = imagesc(interpImg); 
+    set(sc_h,'AlphaData',~isnan(interpImg));
     caxis(colorRange);
     view(2)
     axis equal; axis off;
+    
+    hold on
+    scatter(focus_points(i,2),focus_points(i,1),30,'w','Linewidth',1);
+    hold off
     
 %     title(sprintf('(%d) Time = %.0f ms',slct_frame(i),...
 %         slct_frame(i)*avgWinLen*1000/Fs))
     title(sprintf('%.2f ms',...
         (slct_frame(i)-slct_frame(1))*avgWinLen*1000/Fs));
-    
     drawnow;
     
     set(gca,'FontSize',16)   

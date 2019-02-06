@@ -3,7 +3,7 @@
 % -------------------------------------------------------------------------
 % clear all
 % -------------------------------------------------------------------------
-slctData = 3; 
+slctData = 2; 
 
 switch slctData
     case 1
@@ -75,6 +75,9 @@ MP_Score = cumsum([0; xDiff]).*10000 + MP_Posi(:,1);
 [~,ind] = sort(MP_Score);
 MP_Posi = MP_Posi(ind,:);
 
+handRangeX = [min(MP_Posi(:,2))-20,max(MP_Posi(:,2))+20];
+handRangeY = [min(MP_Posi(:,1)),max(MP_Posi(:,1))];
+
 %% Configuration
 % slow_factor = 25;
 slow_factor = 125;
@@ -101,10 +104,15 @@ freqBandNum = length(freqBand)-1;
 discard_ind = [19, 20, 38, 39, 48, 49, 58, 68, 69, 79, 80, 176, 190, 193, 205, 216,...
     220, 222, 225, 228, 233, 247, 283, 289];
 
-if slctData
-    discard_ind = [discard_ind, 2,26,37,67,74, 94, 106,144, 219,223, 242, 281];
-else
-    discard_ind = [discard_ind, 8, 99, 120, 138, 144, 158, 195, 200, 277];
+switch slctData
+    case 1
+        discard_ind = [discard_ind, 2, 17, 26,37,67,74, 90, 94, 106,136,144, 219,223, 242, 281];
+    case 2
+        discard_ind = [discard_ind, 17,50,121,187,231,248,271];
+    case 3
+        discard_ind = [discard_ind, 8, 99, 120, 138, 144, 158, 195, 200, 277];
+    case 4
+        discard_ind = [discard_ind, 54, 103, 268];
 end
 
 remain_ind = true(1,locator_num);
@@ -156,14 +164,18 @@ filteredData = bandpass(y_vib_sync(remain_ind,:)',...
 y_rect = [];
 y_avg = [];
 
-if slctData
+switch slctData
+    case 1
     frame_num = 1200;
-else
+    case 2
+    frame_num = 1400;
+    case 3
     frame_num = 120;
+    case 4
+    frame_num = 130;
 end
 
 for i = 0:frame_num
-% for i = 801:900
     slct_ind = i*avgWinLen+(1:(2*avgWinLen));
     y_rect = [y_rect;rms(hammWin.*filteredData(slct_ind,:))]; % RMS Rectify
     y_avg = [y_avg;mean(hammWin.*filteredData(slct_ind,:))]; % (Bipolar)
@@ -176,11 +188,17 @@ end
 [meshX,meshY] = meshgrid(1:size(maskImg,2),1:size(maskImg,1));
 switch slctData
     case 1
+        estim_frame = 62:10:1042;
+        focus_speed = 1*realToMap; % Direction 1 (pixel/sec);
     case 2
+        estim_frame = 352:10:1342;
+        focus_speed = -1*realToMap; % Direction 2 (pixel/sec);
     case 3
         estim_frame = 32:114;
-        focus_speed = 11*realToMap; % (pixel/sec);
+        focus_speed = 11*realToMap; % Direction 1 (pixel/sec);
     case 4
+        estim_frame = 32:130;
+        focus_speed = -11*realToMap; % Direction 2 (pixel/sec);
 end
 frame_num = length(estim_frame);
 focus_Posi = NaN(frame_num,2);
@@ -197,7 +215,11 @@ for i = 1:frame_num
     switch slctData
         case 1
             Phi(Phi < 2e7) = 0;
+        case 2
+            Phi(Phi < 2e7) = 0;
         case 3
+            Phi(Phi < 2e7) = 0;
+        case 4
             Phi(Phi < 2e7) = 0;
     end
 
@@ -206,6 +228,15 @@ for i = 1:frame_num
         focus_Posi(i,2) = Phi*meshX(valid_ind);
         focus_Posi(i,1) = Phi*meshY(valid_ind);
     end
+    
+    sc_h = imagesc(trackImg); 
+    set(sc_h,'AlphaData',~isnan(trackImg));
+    view(2);
+    xlim(handRangeX); ylim(handRangeY);
+    axis equal; axis off;
+    hold on;
+    scatter(focus_Posi(i,2),focus_Posi(i,1),30,'m','Linewidth',1);
+    hold off;
 end
 close(wb_h);
 valid_ind = ~isnan(focus_Posi(:,1));
@@ -229,20 +260,21 @@ row_num = 3;
 
 switch slctData
     case 1
-        slct_frame = (0:100:990)+50+2; % (1m/s included in the paper)
-        % slct_frame = (0:100:900)+10+2; % (not good)
-        % slct_frame = 1:5:size(y_avg,1); % (test only);
+        frame_interval = 100;
+        slct_frame = 52:frame_interval:1042; % (1m/s)
+    case 2
+        frame_interval = 100;
+        slct_frame = 322:frame_interval:1302; % (1m/s)
     case 3
-        frame_interval = 9;
-%         slct_frame = -1+(24:9:106);
-        slct_frame = 32:frame_interval:114;
+        frame_interval = 9; 
+        slct_frame = 32:frame_interval:114; % (11m/s)
+    case 4
+        frame_interval = 9; 
+        slct_frame = 32:frame_interval:114; % (11m/s)
 end
 
 
 frame_num = length(slct_frame);
-
-% focus_points = linspace(focus_endPoints(1,1),focus_endPoints(1,end),...
-%     frame_num);
 
 % (pixel/sec)*(cos[Theta])*(sample/frame)/(1/sec)*(frame indcies)
 focus_points = focus_endPoints(1,1) +...
@@ -251,14 +283,14 @@ focus_points = focus_endPoints(1,1) +...
 focus_fit2 = polyval(pf_h,focus_points); 
 focus_points = [focus_points;focus_fit2]';
 
-% plot(focus_points(:,2),focus_points(:,1),'*b')
+% plot(focus_points(:,2),focus_points(:,1),'*b'); hold off;
 
 y_slct = y_avg(slct_frame,:);
 % colorRange = [min(y_slct(:)),max(y_slct(:))*0.7*17/Alpha];
 % colorRange = [-0.0002, 0.0002];
-% colorRange = [0, 0.00016];
-% colorRange = [-0.00016, 0.00016];
-colorRange = [-0.0001, 0.0001];
+% colorRange = [-0.0001, 0.0001];
+% colorRange = [-0.00008, 0.00008];
+colorRange = [-0.00004, 0.00004];
 
 curr_fig = figure('Position',[60,60,1840,580],'Color','w','Name',...
     sprintf('Bandpass [%d - %d Hz]',freqBand(f_i),freqBand(f_i+1)));
@@ -268,7 +300,11 @@ colormap(jet(1000));
 switch slctData
     case 1
         subplot_width = 0.098;
+    case 2
+        subplot_width = 0.098;
     case 3
+        subplot_width = 0.098;
+    case 4
         subplot_width = 0.098;
 end
 
@@ -282,10 +318,11 @@ for i = 1:frame_num
     set(sc_h,'AlphaData',~isnan(interpImg));
     caxis(colorRange);
     view(2)
+    xlim(handRangeX); ylim(handRangeY)
     axis equal; axis off;
     
     hold on
-    scatter(focus_points(i,2),focus_points(i,1),30,'w','Linewidth',1);
+    scatter(focus_points(i,2),focus_points(i,1),30,'k','Linewidth',0.8);
     hold off
     
 %     title(sprintf('(%d) Time = %.0f ms',slct_frame(i),...
@@ -294,14 +331,16 @@ for i = 1:frame_num
         (slct_frame(i)-slct_frame(1))*avgWinLen*1000/Fs));
     drawnow;
     
-    set(gca,'FontSize',16)   
     if i == round(0.5*frame_num)
         c_h = colorbar('Location','south','Ticks',[]);
-        c_h.Label.String = sprintf('RMS Velocity %.1f - %.1f (mm/s)\n',...
+        c_h.Label.String = sprintf('RMS Velocity %.2f - %.2f (mm/s)\n',...
             1000*colorRange);
+        c_h.Label.Position = [0 -2 0];
         disp(c_h.Label.String{1});
     end
 end
+print(curr_fig,sprintf('TimeEvoCase%d',slctData),...
+    '-dpdf','-bestfit','-r600','-painters')
 
 end %------------------------------------------------------------switch end 
 
@@ -320,7 +359,7 @@ open(v_h);
 
 % colorRange = [min(y_avg(:)),max(y_avg(:))*0.8*17/Alpha];
 
-if is1ms
+if slctData <= 2
     % colorRange = [0, 0.00065];
     colorRange = [-0.0002, 0.0002];
 else
@@ -339,6 +378,7 @@ sc_h = imagesc(interpImg);
 set(sc_h,'AlphaData',~isnan(interpImg));
 caxis(colorRange);
 view(2)
+xlim(handRangeX); ylim(handRangeY)
 axis equal; axis off;
 title(sprintf('(%d) [%d - %d Hz] Time = %.1f ms',i,...
     freqBand(f_i),freqBand(f_i+1),i*avgWinLen*1000/Fs))
@@ -348,23 +388,26 @@ trackImg = interpMP(maskImg, MP_Posi(remain_ind,:), y_rect(i,:),...
         maskThreshold, interp_radius, Alpha, C, px2mm); 
 valid_ind = ~isnan(trackImg);
 Phi = exp(200000*trackImg(valid_ind))';
-if is1ms
-    Phi(Phi < 2e7) = 0;
-else
-    Phi(Phi < 2e7) = 0;
+
+switch slctData
+    case 1
+        Phi(Phi < 2e7) = 0;
+    case 2
+        Phi(Phi < 2e7) = 0;
+    case 3
+        Phi(Phi < 2e7) = 0;
+    case 4
+        Phi(Phi < 2e7) = 0;
 end
 
 if sum(Phi > 0)
     Phi = Phi./sum(Phi);
     focus_Posi(i,2) = Phi*meshX(valid_ind);
     focus_Posi(i,1) = Phi*meshY(valid_ind);
-else
-    focus_Posi(i,:) = [-100 -100]; 
+    hold on
+    scatter(focus_Posi(i,2), focus_Posi(i,1),1200,'k','Linewidth',1);
+    hold off
 end
-
-hold on
-scatter(focus_Posi(i,2), focus_Posi(i,1),1200,'k','Linewidth',1);
-hold off
 
 drawnow;
 writeVideo(v_h,getframe(curr_fig));

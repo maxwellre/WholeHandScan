@@ -34,7 +34,8 @@ for sbj_i = 1:sbj_num
     
     locator_num = size(y,1);
     
-    y_filt = bandpass(y',[10 800],Fs)';
+%     y_filt = bandpass(y',[10 800],Fs)';
+    y_filt = lowpass(y',8000,Fs)';
 
     % Segment the measurement using the reference signal
     zero_ind = (abs(ref(end,:)) < 9e-4);
@@ -61,22 +62,23 @@ for sbj_i = 1:sbj_num
     
     if (length(seg_ind)-1) == BPNoiseNum
         for BPN_i = 1:BPNoiseNum     
-            wb_h = waitbar(0, 'O', 'Name',sprintf('SBJ-%s %dHz',...
-            DataInfo{sbj_i,1}, BPNoiseFreq(BPN_i)));
-            for MP_i = 1:locator_num
-                waitbar(MP_i/locator_num,wb_h,...
-                    sprintf('MP %d/%d',MP_i,locator_num));
-                [r,~] = xcorr(ref(end,:),ref(MP_i,:));
-                [~,max_i] = max(r);
-                delay_i = max_i-length(ref(end,:));
-                if (delay_i ~= 0)
-                    fprintf('Subject: %s - %dHz - MP%d Sync Error\n',...
-                        DataInfo{sbj_i,1},BPNoiseFreq(BPN_i),MP_i);
-                end
-                BPNoiseY{sbj_i,BPN_i}(MP_i,:) =...
-                    y_filt(MP_i,(seg_ind(BPN_i):seg_ind(BPN_i+1))+delay_i);
-            end
-            close(wb_h);
+%             wb_h = waitbar(0, 'O', 'Name',sprintf('SBJ-%s %dHz',...
+%             DataInfo{sbj_i,1}, BPNoiseFreq(BPN_i)));
+%             for MP_i = 1:locator_num
+%                 waitbar(MP_i/locator_num,wb_h,...
+%                     sprintf('MP %d/%d',MP_i,locator_num));
+%                 [r,~] = xcorr(ref(end,:),ref(MP_i,:));
+%                 [~,max_i] = max(r);
+%                 delay_i = max_i-length(ref(end,:));
+%                 if (delay_i ~= 0)
+%                     fprintf('Subject: %s - %dHz - MP%d Sync Error\n',...
+%                         DataInfo{sbj_i,1},BPNoiseFreq(BPN_i),MP_i);
+%                 end
+%                 BPNoiseY{sbj_i,BPN_i}(MP_i,:) =...
+%                     y_filt(MP_i,(seg_ind(BPN_i):seg_ind(BPN_i+1))+delay_i);
+%             end
+%             close(wb_h);
+            BPNoiseY{sbj_i,BPN_i}=y_filt(:,seg_ind(BPN_i):seg_ind(BPN_i+1));
         end
     else
         error('Data segmentation failed!')
@@ -86,8 +88,8 @@ close all;
 end
 
 %% Estimate wave speed
-MP_radius = 0.03; % (Unit: m) estimate speed from nearest neighboor within 1 cm
-Estim_radius = 0.03; % (Unit: m) 
+MP_radius = 0.02; % (Unit: m) estimate speed from nearest neighboor within 1 cm
+Estim_radius = 0.03; % (Unit: m) area of estimation
 
 estimate_num = cell(sbj_num,BPNoiseNum);
 wavespeed = cell(sbj_num,BPNoiseNum);
@@ -142,7 +144,9 @@ for BPN_i = 1:BPNoiseNum
         close(wb_h);
         
         medianSpeed{sbj_i,BPN_i} = median(wavespeed{sbj_i,BPN_i},2,'omitnan');
-        avgSpeed(sbj_i,BPN_i) = mean(medianSpeed{sbj_i,BPN_i},'omitnan');
+        
+        avgSpeed(sbj_i,BPN_i) = mean(medianSpeed{sbj_i,BPN_i},'omitnan');       
+        
         fprintf('SBJ-%s %dHz Avg. Speed = %.0f m/s \n',DataInfo{sbj_i,1},...
             BPNoiseFreq(BPN_i), avgSpeed(sbj_i,BPN_i));
     end
@@ -250,7 +254,7 @@ for i = 1:length(slct_ind)
     scatter(MP_Posi(:,2),MP_Posi(:,1),30,sbj_avgSpeed,'filled');
     hold off
 %     caxis(yRange)
-%     caxis([0 50])
+%     caxis([0 1])
     c_h = colorbar('Ticks',[]);
     c_h.Label.String = sprintf('%.0f - %.0f (m/s)',caxis);
 

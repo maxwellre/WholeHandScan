@@ -13,6 +13,10 @@ dataName = {'Greg_MovingSpot_1ms_Dir1','Greg_MovingSpot_1ms_Dir2',...
 dataNum = length(dataName);
 TrialNum = 2;
 
+f_ticks = 40:40:1000;
+
+% for d_i = 1:dataNum
+
 for d_i = 1:dataNum
     for t_i = 1:TrialNum
     
@@ -95,10 +99,27 @@ y_slct = y_vib_sync(slct_ind,:)';
 
 [ spatiogram, freq ] = spectr( y_slct, Fs, [40 1000] );
 
+<<<<<<< HEAD
+temp = abs(bsxfun(@minus, repmat(freq,[length(f_ticks),1]), f_ticks'));
+[~,f_tick_ind] = min(temp,[],2);
+
+=======
+>>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
 %% Plot 
 curr_fig = figure('Position',[60,360,1840,240],'Color','w');
 colormap(jet(1000));
 imagesc(20*log10(spatiogram'))
+<<<<<<< HEAD
+caxis([-160 -80]);
+% x_h = xticks(); xticklabels(round(freq(x_h))); 
+xticks(f_tick_ind); xticklabels(f_ticks); 
+xlabel('Frequency (Hz)');
+y_h = yticks(); yticklabels(round(MP_dist(y_h))); ylabel('Distance (mm)');
+title([dataName{d_i},sprintf(' Trial%d',t_i)],'Interpreter', 'none');
+cb_h = colorbar;
+cb_h.Label.String = 'DB';
+set(gca,'FontSize',16);
+=======
 caxis([-160 -60]);
 x_h = xticks();
 xticklabels(round(freq(x_h))); xlabel('Frequency (Hz)');
@@ -107,6 +128,7 @@ yticklabels(round(MP_dist(y_h))); ylabel('Distance (mm)');
 title([dataName{d_i},sprintf(' Trial%d',t_i)],'Interpreter', 'none');
 cb_h = colorbar;
 cb_h.Label.String = 'DB';
+>>>>>>> e636298822b6fb27d24d53f704e10c4d088a1a93
 drawnow;
     end
 end

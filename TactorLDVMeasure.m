@@ -1,5 +1,5 @@
 %% Sampling NI Terminal Analog Input in Real Time
-% Created on 02/02/2016 based on 'MeasureProgram'
+% Created on 02/19/2019 based on 'UltrahapticsLDVMeasure.m'
 % -------------------------------------------------------------------------
 warning ('off','all');
 % -------------------------------------------------------------------------
@@ -51,7 +51,7 @@ set(plt_h(1), 'UserData', AIData);
 sigDisp_h(2) = subplot('Position',[0.25 0.06 0.72 0.4]);
 hold on
 plt_h(2) = plot(0,0);
-ylim([0.0 0.2]); 
+ylim([-1.0 1.0]); 
 xlim([0 DispDuration])
 xlabel('Time (secs)');
 ylabel('Ref Amplitude (V)')

@@ -16,7 +16,7 @@ Fs = 20000; % (Sampling frequency = 20 kHz)
 
 % % Create a PC afferent
 % a = Afferent('PC','location',[0 0],'idx',1);
-% t = 0:(1/Fs):2; trace = sin(2*pi*100.*t)';
+% t = 0:(1/Fs):2; trace = 5*(1+sin(2*pi*240.*t))';
 % s = Stimulus(trace,[0 0],Fs,0.05); % (~0.1 mm diameter "pin")
 % % Calculate response
 % r = a.response(s); r.rate
@@ -156,17 +156,19 @@ remain_num = length(remain_ind);
 for i = 1:sinNum
 fig_h = figure('Position',[60 120 1800 860],'Color','w');
 colormap(jet(1000));
-subplot('Position',[0.44 0.05 0.52 0.9]);
+subplot('Position',[0.54 0.05 0.42 0.9]);
 imshow(imread([MapPath,'DigitIISinusoid_HandContour.jpg']));
 hold on;
 scatter(MP_Posi(slct_ind,2),MP_Posi(slct_ind,1),100,PC_resp(i,slct_ind),...
     'filled');
 hold off;
-xlabel(tavgData{i,2});    
-c_h = colorbar;
-c_h.Label.String = 'PC Firing Rate (Hz)';
+camroll(90); 
+c_h = colorbar('Location','north','Position',[0.65,0.8,0.22,0.03]);
+c_h.Label.String = 'Average PC Firing Rate (Hz)';
+title(['Sine',tavgData{i,2}],'Position', [100, -200]);   
+set(gca,'FontSize',16);
 
-subplot('Position',[0.05 0.25 0.38 0.5]);
+subplot('Position',[0.05 0.25 0.48 0.5]);
 hold on;
 for j = 1:remain_num
     spike_num = length(PC_spikes{i,remain_ind(reorder_ind(j))});
@@ -176,15 +178,18 @@ hold off;
 xlabel('Time (secs)');
 ylabel('PC#');
 
+set(gca,'FontSize',16, 'YDir','reverse','XAxisLocation','top');
+
 % set(fig_h,'PaperOrientation','landscape');
 print(fig_h,sprintf('RasterPlots/Digit2PCResp_Sin%s',tavgData{i,2}),...
     '-djpeg');
 % print(fig_h,sprintf('RasterPlots/Digit2PCResp_Sin%s',tavgData{i,2}),...
 %     '-dpdf','-fillpage','-painters');
+pause(0.01); close(fig_h);
 end
 
 %% -----------------Average Firing Rate Whole Hand Pattern ----------------
-if 0 %---------------------------------------------------------------------
+if 1 %---------------------------------------------------------------------
 
 cRange = [min(PC_resp(:)), max(PC_resp(:))];
 
@@ -208,6 +213,7 @@ for i = 1:sinNum
     xlabel(tavgData{i,2});
 %     c_h = colorbar;
     caxis(cRange);
+    set(gca,'FontSize',12);
 end
 
 subplot('Position',[(5/colN),1-(3/rowN),1/colN,1/rowN]);
@@ -217,4 +223,5 @@ c_h = colorbar('Location','north');
 c_h.Label.String = 'PC Firing Rate (Hz)';
 caxis(cRange);
 
+set(gca,'FontSize',16);
 end %----------------------------------------------------------------------
